@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MegaCards</string>
+    <string name="add_screenshot">Add Screenshot</string>
+    <string name="delete_screenshot">DElete Screenshot</string>
 </resources>
