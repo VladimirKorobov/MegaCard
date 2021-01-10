@@ -4,12 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -24,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -34,6 +39,8 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +48,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,9 +62,12 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> permissions;
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
+    private int selectedPosition = -1;
 
     class thumbHolder {
-        String fileName;
+        String fileName = "";
+        String iconName = "";
+        String title="";
         Bitmap thumb;
     }
 
@@ -71,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
         thumbList = new ArrayList<>();
         permissions = new ArrayList<>();
         permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
 
         permissionsToRequest = new ArrayList<String>(permissions);
 
@@ -82,22 +93,26 @@ public class MainActivity extends AppCompatActivity {
                         ALL_PERMISSIONS_RESULT);
             }
         }
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //OpenFileDirectory("/storage/emulated/0/Pictures/Screenshots/");
-        OpenAppDirectory();
+        //OpenAppDirectory();
+        readSettings();
+
         gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
         //item click listner
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View view, int position, long id) {
-                int color = getItemColor(position);
-                if(color == getSelection()) {
+                if(position == selectedPosition) {
                     setItemColor(position, getBackground());
+                    selectedPosition = -1;
                 }
                 else {
                     Intent intent = new Intent(MainActivity.this, ViewActivity.class);
                     thumbHolder holder = (thumbHolder) gridView.getAdapter().getItem(position);
 
                     intent.putExtra("fileName", holder.fileName);
+                    intent.putExtra("Title", holder.title);
                     startActivity(intent);
                 }
             }
@@ -107,24 +122,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView parent, View view,
                                            int position, long id) {
+                setItemColor(selectedPosition, getBackground());
                 setItemColor(position, getSelection());
+                selectedPosition = position;
                 return true;
             }
         });
     }
 
+    private int getSelectedPos() {
+        int count = gridView.getAdapter().getCount();
+        if(count > 0) {
+            for (int i = 0; i < count; i++) {
+                int color = getItemColor(i);
+                if (color == getSelection()) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     private int getItemColor(int position) {
-        View view = gridView.getChildAt(position);
+        int firstVisible = gridView.getFirstVisiblePosition();
+        View view = gridView.getChildAt(position - firstVisible);
         ImageView imageView;
         imageView = (ImageView) view.findViewById(R.id.image);
         return ((ColorDrawable)imageView.getBackground()).getColor();
     }
 
     private void setItemColor(int position, int color) {
-        View view = gridView.getChildAt(position);
-        ImageView imageView;
-        imageView = (ImageView) view.findViewById(R.id.image);
-        imageView.setBackgroundColor(color);
+        if(position >= 0 && position <= thumbList.size()) {
+            int firstVisible = gridView.getFirstVisiblePosition();
+            View view = gridView.getChildAt(position - firstVisible);
+            ImageView imageView;
+            imageView = (ImageView) view.findViewById(R.id.image);
+            imageView.setBackgroundColor(color);
+        }
     }
     private Boolean hasPermission(String permission) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -187,13 +221,64 @@ public class MainActivity extends AppCompatActivity {
         return color;
     }
 
-
+/*
     private void OpenAppDirectory() {
         File mydir = this.getDir("imagedir", this.MODE_PRIVATE); //Creating an internal dir;
         OpenFileDirectory(mydir);
     }
+*/
+    private Bitmap createThimb(File file, String title) {
+        Bitmap canvasBitmap = null;
+        if(file.isFile()) try {
+            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+            InputStream stream = new FileInputStream(file);
+            BitmapFactory.decodeStream(stream, null, bitmapOptions);
+            stream.close();
 
-    private void OpenFileDirectory(File dir) {
+            float maxWidth = getResources().getDimensionPixelSize(R.dimen.imagewidth);
+            float maxHeight = getResources().getDimensionPixelSize(R.dimen.imageheight);
+            Resources r = getResources();
+
+            int maxSize = Math.max(bitmapOptions.outWidth, bitmapOptions.outHeight);
+            int sampleSize = (int) ((double) maxSize / maxWidth + 0.5);
+
+            bitmapOptions.inJustDecodeBounds = false;
+            bitmapOptions.inSampleSize = sampleSize;
+            //bitmapOptions.inMutable = true;
+
+            stream = new FileInputStream(file);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream, null, bitmapOptions);
+            if (title != null && title.length() != 0) {
+                // Write title at the bottom
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                float baseline = -paint.ascent();
+                canvasBitmap = Bitmap.createBitmap((int)maxWidth, (int)maxHeight, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(canvasBitmap);
+                canvas.drawBitmap(bitmap,
+                        new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
+                        new Rect((canvasBitmap.getWidth() - bitmap.getWidth())/2, 0,
+                                (canvasBitmap.getWidth() + bitmap.getWidth())/2, canvasBitmap.getHeight()),
+                                paint);
+                float textSize = canvasBitmap.getHeight() / 6;
+                paint.setTextSize(textSize);
+                int width = (int) (paint.measureText(title) + 0.5f);
+                paint.setColor(Color.WHITE);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setTextAlign(Paint.Align.LEFT);
+
+                canvas.drawRect(0, canvasBitmap.getHeight()- textSize - textSize/8, canvasBitmap.getWidth(), canvasBitmap.getHeight(), paint);
+                paint.setColor(Color.BLACK);
+                canvas.drawText(title, (canvasBitmap.getWidth() - width) / 2, canvasBitmap.getHeight() - textSize/8, paint);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return canvasBitmap;
+    }
+
+     private void OpenFileDirectory(File dir) {
 
         if (dir.isDirectory()) {
             thumbList.clear();
@@ -256,10 +341,47 @@ public class MainActivity extends AppCompatActivity {
             case R.id.id_deletescreenshot:
                 DeleteScreenshots();
                 break;
+            case R.id.id_editscreenshot:
+                EditScreenshot();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return false;
+    }
+
+    private void EditScreenshot() {
+        // Get selection
+        if(selectedPosition >= 0 && selectedPosition < thumbList.size()) {
+            EditScreenshot(thumbList.get(selectedPosition));
+        }
+    }
+
+    private void EditScreenshot(final thumbHolder holder) {
+        final EditCardDialog dlg = new EditCardDialog(this);
+        dlg.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                List<EditText> edits = dlg.getTextEdits();
+                holder.title = edits.get(0).getText().toString();
+                try {
+                    Bitmap bitmap = createThimb(new File(holder.fileName), holder.title);
+                    OutputStream out =  new  FileOutputStream(holder.iconName);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                    out.close();
+                    holder.thumb = bitmap;
+                    writeSettings();
+                    gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                dialog.dismiss();
+            }
+        });
+
+        dlg.show(holder);
     }
 
     private void DeleteScreenshots() {
@@ -279,19 +401,27 @@ public class MainActivity extends AppCompatActivity {
                             thumbHolder holder = (thumbHolder) gridView.getAdapter().getItem(i);
                             try {
                                 File f = new File(holder.fileName);
-                                f.delete();
-                                //deleteFile(holder.fileName);
+                                if(f.exists()) {
+                                    f.delete();
+                                }
+                                f = new File(holder.iconName);
+                                if(f.exists()) {
+                                    f.delete();
+                                }
+                                thumbList.remove(i);
+                                break;
                             }
                             catch(Exception ex) {
                                 String s = ex.getMessage();
                                 s = "";
 
                             }
-
                         }
                     }
-                    OpenAppDirectory();
+                    writeSettings();
+                    //OpenAppDirectory();
                     gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+
                 }
             }
         });
@@ -310,7 +440,8 @@ public class MainActivity extends AppCompatActivity {
         Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
         chooseFile.setType("*/*");
         chooseFile = Intent.createChooser(chooseFile, "Choose a file");
-        startActivityForResult(chooseFile, ADD_SCREENSHOT_CODE);    }
+        startActivityForResult(chooseFile, ADD_SCREENSHOT_CODE);
+    }
 
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent resultData) {
@@ -321,12 +452,24 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         Uri uri = resultData.getData();
                         String src = getFileName(uri);
+                        String randName = UUID.randomUUID().toString();
+                        String uniqueSrc = randName + src.substring(src.lastIndexOf('.'));
                         InputStream in = getContentResolver().openInputStream(uri);
                         File mydir = this.getDir("imagedir", this.MODE_PRIVATE); //Creating an internal dir;
-                        OutputStream out = new BufferedOutputStream(new FileOutputStream(mydir.getPath() + "/" + src));
+                        final String outFileName = mydir.getPath() + "/" + uniqueSrc;
+                        OutputStream out = new BufferedOutputStream(new FileOutputStream(outFileName));
                         CopyFile(in, out);
-                        OpenAppDirectory();
-                        gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+                        in.close();
+                        out.close();
+
+                        // Edit card info
+                        mydir = this.getDir("thumbdir", this.MODE_PRIVATE);
+                        final String iconFileName = mydir.getPath() + "/" + randName + ".png";
+                        final thumbHolder holder = new thumbHolder();
+                        holder.fileName = outFileName;
+                        holder.iconName = iconFileName;
+                        thumbList.add(holder);
+                        EditScreenshot(holder);
                     }
                     catch(Exception ex) {
 
@@ -370,5 +513,60 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return result;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //writeSettings();
+    }
+
+    private void writeSettings() {
+        //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
+        File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
+        try {
+            File settings = new File(mydir.getPath() + "/settings.txt");
+            if(settings.exists()) {
+                settings.delete();
+            }
+
+            FileOutputStream fw = new FileOutputStream(settings, true);
+            for(thumbHolder holder: thumbList) {
+                fw.write((holder.fileName + "\n").getBytes());
+                fw.write((holder.iconName + "\n").getBytes());
+                fw.write((holder.title + "\n").getBytes());
+            }
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // ...
+    }
+    private void readSettings() {
+        File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
+        File settings = new File(mydir.getPath() + "/settings.txt");
+        if(settings.exists()) {
+            try {
+                BufferedReader fr = new BufferedReader(new FileReader(settings));
+                String fileName;
+                while((fileName = fr.readLine()) != null) {
+                    thumbHolder holder = new thumbHolder();
+                    holder.fileName = fileName;
+                    holder.iconName = fr.readLine();
+                    holder.title = fr.readLine();
+                    holder.thumb =  BitmapFactory.decodeFile(holder.iconName);
+                    thumbList.add(holder);
+                }
+                fileName = "";
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception ex) {
+                String m = ex.getMessage();
+                ex.printStackTrace();
+            }
+
+        }
     }
 }

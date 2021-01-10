@@ -39,7 +39,7 @@ public class imageAdapter extends BaseAdapter {
         }
         ImageView imageView;
         imageView = (ImageView) convertView.findViewById(R.id.image);
-        imageView.getLayoutParams().height = 300;
+        //imageView.getLayoutParams().height = 600;
         //imageView.setBackgroundColor(Color.WHITE);
         //imageView.setImageResource(arrayList.get(position).getmThumbIds());
         imageView.setImageBitmap(arrayList.get(position).thumb);
