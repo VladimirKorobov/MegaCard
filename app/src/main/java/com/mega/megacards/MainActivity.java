@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         permissionsToRequest = new ArrayList<String>(permissions);
 
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
                 requestPermissions(
@@ -393,35 +394,26 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int count = gridView.getAdapter().getCount();
-                if(count > 0) {
-                    for (int i = 0; i < count; i++) {
-                        int color = getItemColor(i);
-                        if (color == getSelection()) {
-                            thumbHolder holder = (thumbHolder) gridView.getAdapter().getItem(i);
-                            try {
-                                File f = new File(holder.fileName);
-                                if(f.exists()) {
-                                    f.delete();
-                                }
-                                f = new File(holder.iconName);
-                                if(f.exists()) {
-                                    f.delete();
-                                }
-                                thumbList.remove(i);
-                                break;
-                            }
-                            catch(Exception ex) {
-                                String s = ex.getMessage();
-                                s = "";
-
-                            }
+                if(selectedPosition >= 0 && selectedPosition < thumbList.size()) {
+                    thumbHolder holder = thumbList.get(selectedPosition);
+                    try {
+                        File f = new File(holder.fileName);
+                        if(f.exists()) {
+                            f.delete();
                         }
+                        f = new File(holder.iconName);
+                        if(f.exists()) {
+                            f.delete();
+                        }
+                        thumbList.remove(selectedPosition);
+                    }
+                    catch(Exception ex) {
+                        String s = ex.getMessage();
+                        s = "";
+
                     }
                     writeSettings();
-                    //OpenAppDirectory();
                     gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
-
                 }
             }
         });
