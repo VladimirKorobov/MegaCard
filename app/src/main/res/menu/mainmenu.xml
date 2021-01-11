@@ -11,4 +11,8 @@
     <item
         android:id="@+id/id_editscreenshot"
         android:title="@string/edit_screenshot" />
+    <item
+        android:id="@+id/id_exportsettings"
+        android:title="@string/export_settings" />
+
 </menu>

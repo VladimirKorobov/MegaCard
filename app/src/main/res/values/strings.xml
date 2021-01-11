@@ -3,4 +3,5 @@
     <string name="add_screenshot">Add Screenshot</string>
     <string name="delete_screenshot">Delete Screenshot</string>
     <string name="edit_screenshot">Edit Screenshot</string>
+    <string name="export_settings">Export Settings</string>
 </resources>

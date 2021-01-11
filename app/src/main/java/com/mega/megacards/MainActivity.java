@@ -64,15 +64,17 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private int selectedPosition = -1;
 
-    class thumbHolder {
+    static class thumbHolder {
         String fileName = "";
         String iconName = "";
         String title="";
+        String tab = "";
         Bitmap thumb;
     }
 
     GridView gridView;
     ArrayList<thumbHolder> thumbList;
+    SettingsHolder settingsHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         thumbList = new ArrayList<>();
         permissions = new ArrayList<>();
         permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         permissionsToRequest = new ArrayList<String>(permissions);
 
@@ -95,9 +98,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        //OpenFileDirectory("/storage/emulated/0/Pictures/Screenshots/");
-        //OpenAppDirectory();
-        readSettings();
+
+        settingsHolder = new SettingsHolder(this);
+        //settingsHolder.importSettings("/storage/emulated/0/Downloads/export/settingsDir");
+        settingsHolder.readSettings(thumbList);
 
         gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
         //item click listner
@@ -129,19 +133,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-    }
-
-    private int getSelectedPos() {
-        int count = gridView.getAdapter().getCount();
-        if(count > 0) {
-            for (int i = 0; i < count; i++) {
-                int color = getItemColor(i);
-                if (color == getSelection()) {
-                    return i;
-                }
-            }
-        }
-        return -1;
     }
 
     private int getItemColor(int position) {
@@ -222,12 +213,6 @@ public class MainActivity extends AppCompatActivity {
         return color;
     }
 
-/*
-    private void OpenAppDirectory() {
-        File mydir = this.getDir("imagedir", this.MODE_PRIVATE); //Creating an internal dir;
-        OpenFileDirectory(mydir);
-    }
-*/
     private Bitmap createThimb(File file, String title) {
         Bitmap canvasBitmap = null;
         if(file.isFile()) try {
@@ -300,13 +285,6 @@ public class MainActivity extends AppCompatActivity {
 
                     int maxSize = Math.max(bitmapOptions.outWidth, bitmapOptions.outHeight);
                     int sampleSize = (int) ((double) maxSize / maxWidth + 0.5);
-                    // size of thumbnail == 32 here
-                    /*
-                    while(maxSize > 32) {
-                        maxSize /= 2;
-                        sampleSize *= 2;
-                    }
-                    */
 
                     bitmapOptions.inJustDecodeBounds = false;
                     bitmapOptions.inSampleSize = sampleSize;
@@ -345,12 +323,19 @@ public class MainActivity extends AppCompatActivity {
             case R.id.id_editscreenshot:
                 EditScreenshot();
                 break;
+            case R.id.id_exportsettings:
+                ExportSettings();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return false;
     }
 
+    private void ExportSettings() {
+        String exportDir = "/storage/emulated/0/Downloads/export";
+        settingsHolder.exportSettings(exportDir);
+    }
     private void EditScreenshot() {
         // Get selection
         if(selectedPosition >= 0 && selectedPosition < thumbList.size()) {
@@ -371,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
                     out.close();
                     holder.thumb = bitmap;
-                    writeSettings();
+                    settingsHolder.writeSettings(thumbList);
                     gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -412,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                         s = "";
 
                     }
-                    writeSettings();
+                    settingsHolder.writeSettings(thumbList);
                     gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
                 }
             }
@@ -510,10 +495,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //writeSettings();
     }
 
-    private void writeSettings() {
+    private void writeSettings1() {
         //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         try {
@@ -534,7 +518,7 @@ public class MainActivity extends AppCompatActivity {
         }
         // ...
     }
-    private void readSettings() {
+    private void readSettings1() {
         File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         File settings = new File(mydir.getPath() + "/settings.txt");
         if(settings.exists()) {
@@ -561,4 +545,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+
 }
