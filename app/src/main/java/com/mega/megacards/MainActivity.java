@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Map<Integer, Object[]> intendMap = new HashMap<Integer, Object[]>();
     private int ADD_SCREENSHOT_CODE = 11;
-    private Boolean onLongClickPressed = false;
 
     private static final int ALL_PERMISSIONS_RESULT = 1011;
     ArrayList<String> permissions;
@@ -65,11 +64,15 @@ public class MainActivity extends AppCompatActivity {
     private int selectedPosition = -1;
 
     static class thumbHolder {
+        public thumbHolder(MainActivity This) {
+            bkColor = This.getBackground();
+        }
         String fileName = "";
         String iconName = "";
         String title="";
         String tab = "";
         Bitmap thumb;
+        int bkColor;
     }
 
     GridView gridView;
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 if(position == selectedPosition) {
                     setItemColor(position, getBackground());
                     selectedPosition = -1;
+                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 }
                 else {
                     Intent intent = new Intent(MainActivity.this, ViewActivity.class);
@@ -130,26 +134,23 @@ public class MainActivity extends AppCompatActivity {
                 setItemColor(selectedPosition, getBackground());
                 setItemColor(position, getSelection());
                 selectedPosition = position;
+                ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 return true;
             }
         });
     }
 
-    private int getItemColor(int position) {
-        int firstVisible = gridView.getFirstVisiblePosition();
-        View view = gridView.getChildAt(position - firstVisible);
-        ImageView imageView;
-        imageView = (ImageView) view.findViewById(R.id.image);
-        return ((ColorDrawable)imageView.getBackground()).getColor();
-    }
-
     private void setItemColor(int position, int color) {
         if(position >= 0 && position <= thumbList.size()) {
+            thumbList.get(position).bkColor = color;
+            /*
             int firstVisible = gridView.getFirstVisiblePosition();
             View view = gridView.getChildAt(position - firstVisible);
             ImageView imageView;
             imageView = (ImageView) view.findViewById(R.id.image);
             imageView.setBackgroundColor(color);
+
+             */
         }
     }
     private Boolean hasPermission(String permission) {
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                     bitmapOptions.inJustDecodeBounds = false;
                     bitmapOptions.inSampleSize = sampleSize;
 
-                    thumbHolder holder = new thumbHolder();
+                    thumbHolder holder = new thumbHolder(this);
                     holder.fileName = file.getPath();
                     holder.thumb = BitmapFactory.decodeFile(holder.fileName, bitmapOptions);
                     thumbList.add(holder);
@@ -357,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                     out.close();
                     holder.thumb = bitmap;
                     settingsHolder.writeSettings(thumbList);
-                    gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -398,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     settingsHolder.writeSettings(thumbList);
-                    gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 }
             }
         });
@@ -442,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
                         // Edit card info
                         mydir = this.getDir("thumbdir", this.MODE_PRIVATE);
                         final String iconFileName = mydir.getPath() + "/" + randName + ".png";
-                        final thumbHolder holder = new thumbHolder();
+                        final thumbHolder holder = new thumbHolder(this);
                         holder.fileName = outFileName;
                         holder.iconName = iconFileName;
                         thumbList.add(holder);
@@ -526,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
                 BufferedReader fr = new BufferedReader(new FileReader(settings));
                 String fileName;
                 while((fileName = fr.readLine()) != null) {
-                    thumbHolder holder = new thumbHolder();
+                    thumbHolder holder = new thumbHolder(this);
                     holder.fileName = fileName;
                     holder.iconName = fr.readLine();
                     holder.title = fr.readLine();

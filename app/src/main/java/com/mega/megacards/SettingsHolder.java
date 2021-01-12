@@ -125,7 +125,7 @@ public class SettingsHolder {
                     String value = line.substring(line.indexOf(':') + 1);
                     switch(key) {
                         case "Item":
-                            holder = new MainActivity.thumbHolder();
+                            holder = new MainActivity.thumbHolder((MainActivity)content);
                             break;
                         case "Image":
                             holder.fileName = value;
