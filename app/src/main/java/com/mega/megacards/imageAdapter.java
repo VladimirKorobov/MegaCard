@@ -43,6 +43,7 @@ public class imageAdapter extends BaseAdapter {
         //imageView.setBackgroundColor(Color.WHITE);
         //imageView.setImageResource(arrayList.get(position).getmThumbIds());
         imageView.setImageBitmap(arrayList.get(position).thumb);
+        imageView.setBackgroundColor(arrayList.get(position).bkColor);
         return convertView;
     }
 }
