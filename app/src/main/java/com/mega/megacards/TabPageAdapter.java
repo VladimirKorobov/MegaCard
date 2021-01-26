@@ -12,9 +12,11 @@ public class TabPageAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 2;
     List<Fragment> fragments = new ArrayList<>();
     private Context context;
-    public TabPageAdapter(FragmentManager fm, Context context) {
+    ThumbMap thumbMap;
+    public TabPageAdapter(FragmentManager fm, Context context, ThumbMap thumbMap) {
         super(fm);
         this.context = context;
+        this.thumbMap = thumbMap;
     }
 
     public void Update() {
@@ -25,7 +27,7 @@ public class TabPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        Fragment fragment = PageFragment.newInstance(context, position);
+        Fragment fragment = PageFragment.newInstance(context, position, this.thumbMap);
         fragments.add(fragment);
         return fragment;
     }
@@ -36,8 +38,11 @@ public class TabPageAdapter extends FragmentPagerAdapter {
     }
     @Override
     public CharSequence getPageTitle(int position) {
-        // генерируем заголовок в зависимости от позиции
-        return position == 0 ? "Running" : "Stopped";
-    }
 
+        if(position >= 0 && position < thumbMap.keySet().size()) {
+            Object[] keys = thumbMap.keySet().toArray();
+            return (String)keys[position];
+        }
+        return "";
+    }
 }

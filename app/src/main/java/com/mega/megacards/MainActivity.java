@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -76,7 +77,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     GridView gridView;
+    private TabPageAdapter paperAdapter;
     ArrayList<thumbHolder> thumbList;
+    ThumbMap thumbMap = new ThumbMap();
     SettingsHolder settingsHolder;
 
     @Override
@@ -84,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gridView = (GridView) findViewById(R.id.gridview);
         thumbList = new ArrayList<>();
         permissions = new ArrayList<>();
         permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -105,9 +107,16 @@ public class MainActivity extends AppCompatActivity {
         settingsHolder = new SettingsHolder(this);
         //settingsHolder.importSettings("/storage/emulated/0/Downloads/export/settingsDir");
         settingsHolder.readSettings(thumbList);
+        settingsHolder.readSettings(thumbMap);
 
-        gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
+        //gridView = (GridView) findViewById(R.id.gridview);
+        ViewPager viewPager = (ViewPager)findViewById(R.id.viewpager);
+        paperAdapter = new TabPageAdapter(getSupportFragmentManager(), this, thumbMap);
+        viewPager.setAdapter(paperAdapter);
+
+        //gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
         //item click listner
+        /*
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View view, int position, long id) {
@@ -138,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+         */
     }
 
     private void setItemColor(int position, int color) {

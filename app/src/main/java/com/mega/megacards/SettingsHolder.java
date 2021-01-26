@@ -112,6 +112,34 @@ public class SettingsHolder {
         }
         // ...
     }
+    void writeSettings(ThumbMap thumbMap) {
+        //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
+        File mydir = this.content.getDir("settingsDir", content.MODE_PRIVATE); //Creating an internal dir;
+        try {
+            File settings = new File(mydir.getPath() + "/settings.txt");
+            if(settings.exists()) {
+                settings.delete();
+            }
+
+            FileOutputStream fw = new FileOutputStream(settings, true);
+            int item = 0;
+            for ( String key : thumbMap.keySet() ) {
+                ArrayList<MainActivity.thumbHolder> list = thumbMap.get(key);
+                for (MainActivity.thumbHolder holder : list) {
+                    fw.write(("Item:" + Integer.toString(item) + "\n").getBytes());
+                    fw.write(("Tab:" + holder.tab + "\n").getBytes());
+                    fw.write(("Image:" + holder.fileName + "\n").getBytes());
+                    fw.write(("Thumb:" + holder.iconName + "\n").getBytes());
+                    fw.write(("Title:" + holder.title + "\n").getBytes());
+                    fw.write(("Stop:" + "\n").getBytes());
+                }
+            }
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // ...
+    }
     void readSettings(ArrayList<MainActivity.thumbHolder> thumbList) {
         File mydir = this.content.getDir("settingsDir", content.MODE_PRIVATE); //Creating an internal dir;
         File settings = new File(mydir.getPath() + "/settings.txt");
@@ -142,6 +170,55 @@ public class SettingsHolder {
                         case "Stop":
                             holder.thumb =  BitmapFactory.decodeFile(holder.iconName);
                             thumbList.add(holder);
+                            break;
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception ex) {
+                String m = ex.getMessage();
+                ex.printStackTrace();
+            }
+        }
+    }
+    void readSettings(ThumbMap thumbMap) {
+        File mydir = this.content.getDir("settingsDir", content.MODE_PRIVATE); //Creating an internal dir;
+        File settings = new File(mydir.getPath() + "/settings.txt");
+        if(settings.exists()) {
+            try {
+                BufferedReader fr = new BufferedReader(new FileReader(settings));
+                String line;
+                MainActivity.thumbHolder holder = null;
+                while((line = fr.readLine()) != null) {
+                    String key = line.substring(0, line.indexOf(':'));
+                    String value = line.substring(line.indexOf(':') + 1);
+                    switch(key) {
+                        case "Item":
+                            holder = new MainActivity.thumbHolder((MainActivity)content);
+                            break;
+                        case "Image":
+                            holder.fileName = value;
+                            break;
+                        case "Thumb":
+                            holder.iconName = value;
+                            break;
+                        case "Title":
+                            holder.title = value;
+                            break;
+                        case "Tab":
+                            holder.tab = value;
+                            break;
+                        case "Stop":
+                            holder.thumb =  BitmapFactory.decodeFile(holder.iconName);
+                            ArrayList<MainActivity.thumbHolder> list =thumbMap.get(holder.tab);
+                            if(list == null) {
+                                list = new ArrayList<MainActivity.thumbHolder>();
+                                thumbMap.put(holder.tab, list);
+                            }
+
+                            list.add(holder);
                             break;
                     }
                 }
