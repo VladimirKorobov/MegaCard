@@ -27,14 +27,18 @@ public class TabPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        Fragment fragment = PageFragment.newInstance(context, position, this.thumbMap);
-        fragments.add(fragment);
-        return fragment;
+        Fragment fragment;
+        if(position <= fragments.size()) {
+            fragment = PageFragment.newInstance(context, position, this.thumbMap);
+            fragments.add(fragment);
+        }
+
+        return fragments.get(position);
     }
 
     @Override
     public int getCount() {
-        return PAGE_COUNT;
+        return thumbMap.keySet().size();
     }
     @Override
     public CharSequence getPageTitle(int position) {

@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<thumbHolder> thumbList;
     ThumbMap thumbMap = new ThumbMap();
     SettingsHolder settingsHolder;
+    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,9 +110,10 @@ public class MainActivity extends AppCompatActivity {
         //settingsHolder.importSettings("/storage/emulated/0/Downloads/export/settingsDir");
         settingsHolder.readSettings(thumbList);
         settingsHolder.readSettings(thumbMap);
+        cleanup(thumbMap);
 
         //gridView = (GridView) findViewById(R.id.gridview);
-        ViewPager viewPager = (ViewPager)findViewById(R.id.viewpager);
+        viewPager = (ViewPager)findViewById(R.id.viewpager);
         paperAdapter = new TabPageAdapter(getSupportFragmentManager(), this, thumbMap);
         viewPager.setAdapter(paperAdapter);
 
@@ -150,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
          */
     }
 
-    private void setItemColor(int position, int color) {
+    public void setItemColor(int position, int color) {
         if(position >= 0 && position <= thumbList.size()) {
             thumbList.get(position).bkColor = color;
             /*
@@ -216,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int getBackground() {
-        final int color = ContextCompat.getColor(this, R.color.colorBackground);
+        final int color = ContextCompat.getColor(MainActivity.this, R.color.colorBackground);
         return color;
     }
     public int getSelection() {
@@ -368,7 +371,15 @@ public class MainActivity extends AppCompatActivity {
                     out.close();
                     holder.thumb = bitmap;
                     settingsHolder.writeSettings(thumbList);
-                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
+                    notifyFragment();
+                    /*
+                    int fragmentIndex = viewPager.getCurrentItem();
+                    Object[] keys = thumbMap.keySet().toArray();
+                    String key = (String)keys[fragmentIndex];
+
+                     */
+
+                    //((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -381,6 +392,13 @@ public class MainActivity extends AppCompatActivity {
         dlg.show(holder);
     }
 
+    public void notifyFragment() {
+        int fragmentIndex = viewPager.getCurrentItem();
+        PageFragment fragment = (PageFragment)((TabPageAdapter)viewPager.getAdapter()).getItem(fragmentIndex);
+        GridView view = (GridView)fragment.getView();
+        ((imageAdapter)view.getAdapter()).notifyDataSetChanged();
+    }
+
     private void DeleteScreenshots() {
         //SparseBooleanArray checked = gridView.getCheckedItemPositions();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -390,8 +408,14 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(selectedPosition >= 0 && selectedPosition < thumbList.size()) {
-                    thumbHolder holder = thumbList.get(selectedPosition);
+
+                int fragmentIndex = viewPager.getCurrentItem();
+                Object[] keys = thumbMap.keySet().toArray();
+                String key = (String)keys[fragmentIndex];
+                ArrayList<thumbHolder> list = thumbMap.get(key);
+
+                if(selectedPosition >= 0 && selectedPosition < list.size()) {
+                    thumbHolder holder = list.get(selectedPosition);
                     try {
                         File f = new File(holder.fileName);
                         if(f.exists()) {
@@ -409,7 +433,9 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     settingsHolder.writeSettings(thumbList);
-                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
+                    notifyFragment();
+
+                    //((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 }
             }
         });
@@ -422,6 +448,59 @@ public class MainActivity extends AppCompatActivity {
         });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void cleanup(ThumbMap thumbMap) {
+        File mydir = this.getDir("imagedir", this.MODE_PRIVATE); //Creating an internal dir;
+        String[] files = mydir.list();
+        for(String file: files) {
+            String full = mydir.getPath() + "/" + file;
+            thumbHolder thumbFound = null;
+            for(String key : thumbMap.keySet()) {
+                ArrayList<thumbHolder> list = thumbMap.get(key);
+                for(thumbHolder thumb: list ) {
+                    if(thumb.fileName.equals(full)) {
+                        thumbFound = thumb;
+                        break;
+                    }
+                }
+                if(thumbFound != null) {
+                    break;
+                }
+            }
+            if(thumbFound == null) {
+                File f = new File(full);
+                if(f.exists()) {
+                    // Delete file
+                    f.delete();
+                }
+            }
+        }
+        mydir = this.getDir("thumbdir", this.MODE_PRIVATE); //Creating an internal dir;
+        files = mydir.list();
+        for(String file: files) {
+            String full = mydir.getPath() + "/" + file;
+            thumbHolder thumbFound = null;
+            for(String key : thumbMap.keySet()) {
+                ArrayList<thumbHolder> list = thumbMap.get(key);
+                for(thumbHolder thumb: list ) {
+                    if(thumb.iconName.equals(full)) {
+                        thumbFound = thumb;
+                        break;
+                    }
+                }
+                if(thumbFound != null) {
+                    break;
+                }
+            }
+            if(thumbFound == null) {
+                File f = new File(full);
+                if(f.exists()) {
+                    // Delete file
+                    f.delete();
+                }
+            }
+        }
     }
 
     private void AddScreenshot() {
@@ -456,7 +535,15 @@ public class MainActivity extends AppCompatActivity {
                         final thumbHolder holder = new thumbHolder(this);
                         holder.fileName = outFileName;
                         holder.iconName = iconFileName;
-                        thumbList.add(holder);
+                        // Holder tab
+                        int fragmentIndex = viewPager.getCurrentItem();
+                        Object[] keys = thumbMap.keySet().toArray();
+                        String key = (String)keys[fragmentIndex];
+                        holder.tab = key;
+                        ArrayList<thumbHolder> list = thumbMap.get(key);
+                        list.add(holder);
+
+                        //thumbList.add(holder);
                         EditScreenshot(holder);
                     }
                     catch(Exception ex) {

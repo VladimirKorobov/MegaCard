@@ -88,6 +88,7 @@ public class SettingsHolder {
     }
 
     void writeSettings(ArrayList<MainActivity.thumbHolder> thumbList) {
+        /*
         //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         File mydir = this.content.getDir("settingsDir", content.MODE_PRIVATE); //Creating an internal dir;
         try {
@@ -111,6 +112,8 @@ public class SettingsHolder {
             e.printStackTrace();
         }
         // ...
+
+         */
     }
     void writeSettings(ThumbMap thumbMap) {
         //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
@@ -183,6 +186,7 @@ public class SettingsHolder {
             }
         }
     }
+
     void readSettings(ThumbMap thumbMap) {
         File mydir = this.content.getDir("settingsDir", content.MODE_PRIVATE); //Creating an internal dir;
         File settings = new File(mydir.getPath() + "/settings.txt");
