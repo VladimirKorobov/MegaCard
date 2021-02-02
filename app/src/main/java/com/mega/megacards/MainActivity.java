@@ -361,6 +361,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void EditScreenshot(final thumbHolder holder) {
         final EditCardDialog dlg = new EditCardDialog(this);
+        dlg.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
         dlg.setPositiveButton("OK", new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -391,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        dlg.show(holder);
+        dlg.show(holder, thumbMap);
     }
 
     private PageFragment getCurPageFragment() {
