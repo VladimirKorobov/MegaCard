@@ -40,6 +40,22 @@ public class PageFragment extends Fragment {
         return fragment;
     }
 
+    public int getSelectedPosition() {
+        return selectedPosition;
+    }
+
+    public MainActivity.thumbHolder getSelectedHolder() {
+        if(selectedPosition >= 0) {
+            Object[] keys = thumbMap.keySet().toArray();
+            String key = (String)keys[mPage];
+            ArrayList<MainActivity.thumbHolder> list = thumbMap.get(key);
+            if(selectedPosition < list.size()) {
+                return list.get(selectedPosition);
+            }
+        }
+        return null;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceSrate) {

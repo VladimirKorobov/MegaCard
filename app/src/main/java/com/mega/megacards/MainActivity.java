@@ -352,8 +352,10 @@ public class MainActivity extends AppCompatActivity {
     }
     private void EditScreenshot() {
         // Get selection
-        if(selectedPosition >= 0 && selectedPosition < thumbList.size()) {
-            EditScreenshot(thumbList.get(selectedPosition));
+        PageFragment fragment = getCurPageFragment();
+        thumbHolder holder = fragment.getSelectedHolder();
+        if(holder != null) {
+            EditScreenshot(holder);
         }
     }
 
@@ -392,9 +394,13 @@ public class MainActivity extends AppCompatActivity {
         dlg.show(holder);
     }
 
-    public void notifyFragment() {
+    private PageFragment getCurPageFragment() {
         int fragmentIndex = viewPager.getCurrentItem();
         PageFragment fragment = (PageFragment)((TabPageAdapter)viewPager.getAdapter()).getItem(fragmentIndex);
+        return fragment;
+    }
+    public void notifyFragment() {
+        PageFragment fragment = getCurPageFragment();
         GridView view = (GridView)fragment.getView();
         ((imageAdapter)view.getAdapter()).notifyDataSetChanged();
     }
