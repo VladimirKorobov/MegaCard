@@ -7,7 +7,10 @@ import android.graphics.Color;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -49,7 +52,7 @@ public class EditCardDialog extends AlertDialog.Builder{
         return list;
     }
 
-     private EditText addtext(TableLayout layout, String name, String value, float weight, int textType) {
+    private TableRow initRow(TableLayout layout, String name, float weight, float height)   {
         TableRow tableRow = new TableRow(mContext);
         tableRow.setBackgroundColor(Color.BLACK);
 
@@ -60,8 +63,6 @@ public class EditCardDialog extends AlertDialog.Builder{
                 1f);
         tableRow.setPadding(0, 0, 0, 2);
         tableRow.setLayoutParams(params);
-
-        float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
 
         // Create text view for field name
         TextView textView = new TextView(mContext);
@@ -79,19 +80,26 @@ public class EditCardDialog extends AlertDialog.Builder{
         params.setMargins(0,0, 2, 0);
         textView.setLayoutParams(params);
         tableRow.addView(textView);
+        layout.addView(tableRow);
+        return tableRow;
+    }
 
+    private EditText addtext(TableLayout layout, String name, String value, float weight, int textType) {
+        float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
+        TableRow tableRow = initRow(layout, name, weight, height);
         // Create text edit for field value
         EditText editText = new EditText(mContext);
         editText.setText(value);
-        editText.setPadding(5, (int)(editText.getTextSize() / 2), 5, 2);
+        editText.setPadding(50, (int)(editText.getTextSize() / 2), 5, 2);
         //editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, 30f);
         editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
         editText.setBackgroundColor(Color.WHITE);
         editText.setTextColor(Color.BLACK);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
         editText.setImeOptions(EditorInfo.IME_ACTION_GO);
         editText.setInputType(textType);
 
-        params = new TableRow.LayoutParams(
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT,
                 1.f - weight);
@@ -99,64 +107,48 @@ public class EditCardDialog extends AlertDialog.Builder{
         editText.setLayoutParams(params);
 
         tableRow.addView(editText);
-
-
-        layout.addView(tableRow);
-
         return editText;
     }
     private ListView addListView(TableLayout layout, String name, String[] stringArray, float weight) {
-        TableRow tableRow = new TableRow(mContext);
-        tableRow.setBackgroundColor(Color.BLACK);
-        // Create row with black paddings
-        TableRow.LayoutParams params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
-                1f);
-        tableRow.setPadding(0, 0, 0, 2);
-        tableRow.setLayoutParams(params);
-
-        float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
-        // Create text view for field name
-        TextView textView = new TextView(mContext);
-        textView.setText(name);
-        //textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, 30f);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
-        textView.setBackgroundColor(Color.WHITE);
-        textView.setTextColor(Color.GRAY);
-        textView.setPadding(5, 0, 5, 2);
-        textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-        params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
-                weight);
-        params.setMargins(0,0, 2, 0);
-        textView.setLayoutParams(params);
-        tableRow.addView(textView);
-
+        final float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
+        TableRow tableRow = initRow(layout, name, weight, height);
         // Create List view
         ListView listView = new ListView(mContext);
-        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, android.R.id.text1, stringArray);
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, android.R.id.text1, stringArray) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                // Initialize a TextView for ListView each Item
+                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                // Set the text color of TextView (ListView Item)
+                tv.setTextColor(Color.BLUE);
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
+                tv.setPadding(50, 0, 5, 2);
+                tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+                // Generate ListView Item using TextView
+                return view;
+            }
+        };
+
         listView.setAdapter(modeAdapter);
 
         listView.setBackgroundColor(Color.WHITE);
-        for (int i = 0; i < listView.getChildCount(); i++) {
-            TextView tv = (TextView)listView.getChildAt(i);
-            tv.setTextColor(Color.BLACK);
-            tv.setTextColor(Color.GRAY);
-            tv.setPadding(5, 0, 5, 2);
-            tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-        }
-
-        params = new TableRow.LayoutParams(
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT,
                 1.f - weight);
 
         listView.setLayoutParams(params);
-        tableRow.addView(listView);
 
-        layout.addView(tableRow);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id)
+            {
+                // по позиции получаем выбранный элемент
+            }
+        });
+
+        tableRow.addView(listView);
 
         return listView;
     }
