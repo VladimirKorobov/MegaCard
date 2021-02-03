@@ -327,10 +327,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.id_exportsettings:
                 ExportSettings();
                 break;
+            case R.id.id_exit:
+                Exit();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return false;
+    }
+
+    private void Exit() {
+        finish();
     }
 
     private void ExportSettings() {

@@ -14,5 +14,8 @@
     <item
         android:id="@+id/id_exportsettings"
         android:title="@string/export_settings" />
+    <item
+        android:id="@+id/id_exit"
+        android:title="Exit" />
 
 </menu>
