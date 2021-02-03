@@ -226,6 +226,9 @@ public class SettingsHolder {
                             break;
                     }
                 }
+                if(thumbMap.keySet().size() == 0) {
+                    thumbMap.put("", new ArrayList<MainActivity.thumbHolder>());
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {

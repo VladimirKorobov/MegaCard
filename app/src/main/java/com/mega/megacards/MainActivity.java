@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
         settingsHolder = new SettingsHolder(this);
         //settingsHolder.importSettings("/storage/emulated/0/Downloads/export/settingsDir");
-        settingsHolder.readSettings(thumbList);
+        //settingsHolder.readSettings(thumbList);
         settingsHolder.readSettings(thumbMap);
         cleanup(thumbMap);
 
