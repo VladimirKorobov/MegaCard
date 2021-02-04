@@ -39,10 +39,14 @@ public class EditCardDialog extends AlertDialog.Builder{
         list.add(addtext(tableLayout, "Title", thumbHolder.title, weights[0], textTypes[0]));
         Object[] keys = map.keySet().toArray();
         String[] keysS = new String[keys.length];
+        int selectedIndex = -1;
         for(int i = 0; i < keys.length; i ++) {
             keysS[i] = (String)keys[i];
+            if(keysS[i] == thumbHolder.tab) {
+                selectedIndex = i;
+            }
         }
-        addListView(tableLayout, "Tab", keysS, weights[0]);
+        addListView(tableLayout, "Tab", keysS, selectedIndex, weights[0]);
 
         this.setView(tableLayout);
         this.show();
@@ -109,7 +113,7 @@ public class EditCardDialog extends AlertDialog.Builder{
         tableRow.addView(editText);
         return editText;
     }
-    private ListView addListView(TableLayout layout, String name, String[] stringArray, float weight) {
+    private ListView addListView(TableLayout layout, String name, String[] stringArray, final int selectedItem, float weight) {
         final float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
         TableRow tableRow = initRow(layout, name, weight, height);
         // Create List view
@@ -122,6 +126,10 @@ public class EditCardDialog extends AlertDialog.Builder{
                 TextView tv = (TextView) view.findViewById(android.R.id.text1);
                 // Set the text color of TextView (ListView Item)
                 tv.setTextColor(Color.BLUE);
+                if(position == selectedItem) {
+                    tv.setBackgroundColor(Color.LTGRAY);
+                    //tv.setSelected(true);
+                }
                 tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
                 tv.setPadding(50, 0, 5, 2);
                 tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
@@ -135,7 +143,7 @@ public class EditCardDialog extends AlertDialog.Builder{
         listView.setBackgroundColor(Color.WHITE);
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
+                (int)(height / 30.0f * 3),
                 1.f - weight);
 
         listView.setLayoutParams(params);
@@ -144,6 +152,11 @@ public class EditCardDialog extends AlertDialog.Builder{
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id)
             {
+                for (int j = 0; j < parent.getChildCount(); j++)
+                    parent.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
+
+                // change the background color of the selected element
+                v.setBackgroundColor(Color.LTGRAY);
                 // по позиции получаем выбранный элемент
             }
         });
