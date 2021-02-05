@@ -38,15 +38,21 @@ public class EditCardDialog extends AlertDialog.Builder{
         int[] textTypes = new int[] {InputType.TYPE_CLASS_TEXT};
         list.add(addtext(tableLayout, "Title", thumbHolder.title, weights[0], textTypes[0]));
         Object[] keys = map.keySet().toArray();
-        String[] keysS = new String[keys.length];
+        ArrayList<CardEditAdapter.EditorItem> items = new ArrayList<CardEditAdapter.EditorItem>();
         int selectedIndex = -1;
         for(int i = 0; i < keys.length; i ++) {
-            keysS[i] = (String)keys[i];
-            if(keysS[i] == thumbHolder.tab) {
-                selectedIndex = i;
+            CardEditAdapter.EditorItem item = new CardEditAdapter.EditorItem();
+            item.card = (String)keys[i];
+            if(item.card == thumbHolder.tab) {
+                item.color = Color.LTGRAY;
             }
+            else {
+                item.color = Color.TRANSPARENT;
+            }
+            items.add(item);
         }
-        addListView(tableLayout, "Tab", keysS, selectedIndex, weights[0]);
+
+        addListView(tableLayout, "Tab", items, selectedIndex, weights[0]);
 
         this.setView(tableLayout);
         this.show();
@@ -113,37 +119,19 @@ public class EditCardDialog extends AlertDialog.Builder{
         tableRow.addView(editText);
         return editText;
     }
-    private ListView addListView(TableLayout layout, String name, String[] stringArray, final int selectedItem, float weight) {
+    private ListView addListView(TableLayout layout, String name, ArrayList<CardEditAdapter.EditorItem> items, final int selectedItem, float weight) {
         final float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
         TableRow tableRow = initRow(layout, name, weight, height);
         // Create List view
-        ListView listView = new ListView(mContext);
-        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, android.R.id.text1, stringArray) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                // Initialize a TextView for ListView each Item
-                TextView tv = (TextView) view.findViewById(android.R.id.text1);
-                // Set the text color of TextView (ListView Item)
-                tv.setTextColor(Color.BLUE);
-                if(position == selectedItem) {
-                    tv.setBackgroundColor(Color.LTGRAY);
-                    //tv.setSelected(true);
-                }
-                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
-                tv.setPadding(50, 0, 5, 2);
-                tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-                // Generate ListView Item using TextView
-                return view;
-            }
-        };
+        final ListView listView = new ListView(mContext);
+        final CardEditAdapter adapter = new CardEditAdapter(mContext, items);
 
-        listView.setAdapter(modeAdapter);
+        listView.setAdapter(adapter);
 
         listView.setBackgroundColor(Color.WHITE);
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
-                (int)(height / 30.0f * 3),
+                (int)(height / 30.0f * 6),
                 1.f - weight);
 
         listView.setLayoutParams(params);
@@ -152,12 +140,12 @@ public class EditCardDialog extends AlertDialog.Builder{
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id)
             {
-                for (int j = 0; j < parent.getChildCount(); j++)
-                    parent.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
+                for (int j = 0; j < adapter.getCount(); j++)
+                    ((CardEditAdapter.EditorItem)adapter.getItem(j)).color = Color.TRANSPARENT;
 
                 // change the background color of the selected element
-                v.setBackgroundColor(Color.LTGRAY);
-                // по позиции получаем выбранный элемент
+                ((CardEditAdapter.EditorItem)adapter.getItem(position)).color = Color.LTGRAY;
+                adapter.notifyDataSetChanged();
             }
         });
 

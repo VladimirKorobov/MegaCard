@@ -11,5 +11,4 @@
         android:layout_width="@dimen/imagewidth"
         android:background="@color/colorBackground"
         android:scaleType="fitCenter"/>
-
 </RelativeLayout>
