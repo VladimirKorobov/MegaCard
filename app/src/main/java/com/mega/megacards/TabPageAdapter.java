@@ -4,11 +4,12 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabPageAdapter extends FragmentPagerAdapter {
+public class TabPageAdapter extends FragmentStatePagerAdapter {
     final int PAGE_COUNT = 2;
     List<Fragment> fragments = new ArrayList<>();
     private Context context;
@@ -28,7 +29,7 @@ public class TabPageAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         Fragment fragment;
-        if(position <= fragments.size()) {
+        if(position >= fragments.size()) {
             fragment = PageFragment.newInstance(context, position, this.thumbMap);
             fragments.add(fragment);
         }
@@ -48,5 +49,9 @@ public class TabPageAdapter extends FragmentPagerAdapter {
             return (String)keys[position];
         }
         return "";
+    }
+    @Override
+    public int getItemPosition(Object object) {
+        return FragmentStatePagerAdapter.POSITION_NONE;
     }
 }

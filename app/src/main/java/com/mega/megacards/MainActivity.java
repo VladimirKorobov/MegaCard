@@ -77,8 +77,6 @@ public class MainActivity extends AppCompatActivity {
         int bkColor;
     }
 
-    GridView gridView;
-    private TabPageAdapter paperAdapter;
     ArrayList<thumbHolder> thumbList;
     ThumbMap thumbMap = new ThumbMap();
     SettingsHolder settingsHolder;
@@ -114,8 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         //gridView = (GridView) findViewById(R.id.gridview);
         viewPager = (ViewPager)findViewById(R.id.viewpager);
-        paperAdapter = new TabPageAdapter(getSupportFragmentManager(), this, thumbMap);
-        viewPager.setAdapter(paperAdapter);
+        viewPager.setAdapter(new TabPageAdapter(getSupportFragmentManager(), this, thumbMap));
 
         //gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
         //item click listner
@@ -226,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
         final int color = ContextCompat.getColor(this, R.color.colorSelection);
         return color;
     }
+    public int getCardSelection() {
+        final int color = ContextCompat.getColor(this, R.color.colorSelectionCard);
+        return color;
+    }
 
     private Bitmap createThimb(File file, String title) {
         Bitmap canvasBitmap = null;
@@ -313,9 +314,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-
             }
-
         }
     }
 
@@ -367,6 +366,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void EditScreenshot(final thumbHolder holder) {
+        final MainActivity This = this;
         final EditCardDialog dlg = new EditCardDialog(this);
         dlg.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -377,28 +377,35 @@ public class MainActivity extends AppCompatActivity {
         dlg.setPositiveButton("OK", new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                List<EditText> edits = dlg.getTextEdits();
-                holder.title = edits.get(0).getText().toString();
-                try {
-                    Bitmap bitmap = createThimb(new File(holder.fileName), holder.title);
-                    OutputStream out =  new  FileOutputStream(holder.iconName);
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    out.close();
-                    holder.thumb = bitmap;
-                    settingsHolder.writeSettings(thumbList);
-                    notifyFragment();
-                    /*
-                    int fragmentIndex = viewPager.getCurrentItem();
-                    Object[] keys = thumbMap.keySet().toArray();
-                    String key = (String)keys[fragmentIndex];
-
-                     */
-
-                    //((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                String title = dlg.getTitle();
+                String tab = dlg.getTab();
+                boolean titleChanged = !holder.title.equals(title);
+                boolean tabChanged = !holder.tab.equals(tab);
+                if(titleChanged) {
+                    try {
+                        holder.title = title;
+                        Bitmap bitmap = createThimb(new File(holder.fileName), holder.title);
+                        OutputStream out = new FileOutputStream(holder.iconName);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                        out.close();
+                        holder.thumb = bitmap;
+                        settingsHolder.writeSettings(thumbList);
+                        notifyFragment();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(tabChanged) {
+                    ArrayList<MainActivity.thumbHolder> oldHolders = thumbMap.get(holder.tab);
+                    ArrayList<MainActivity.thumbHolder> newHolders = thumbMap.get(tab);
+                    holder.tab = tab;
+                    holder.bkColor = getBackground();
+                    oldHolders.remove(holder);
+                    newHolders.add(holder);
+                    //viewPager.setAdapter(new TabPageAdapter(getSupportFragmentManager(), This, thumbMap));
+                    viewPager.getAdapter().notifyDataSetChanged();
                 }
                 dialog.dismiss();
             }

@@ -8,10 +8,8 @@ import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -24,6 +22,7 @@ import java.util.List;
 public class EditCardDialog extends AlertDialog.Builder{
     Context mContext;
     List<EditText> list;
+    ArrayList<CardEditAdapter.EditorItem> items = new ArrayList<CardEditAdapter.EditorItem>();
     public EditCardDialog(Context context) {
         super(context);
         mContext = context;
@@ -38,13 +37,12 @@ public class EditCardDialog extends AlertDialog.Builder{
         int[] textTypes = new int[] {InputType.TYPE_CLASS_TEXT};
         list.add(addtext(tableLayout, "Title", thumbHolder.title, weights[0], textTypes[0]));
         Object[] keys = map.keySet().toArray();
-        ArrayList<CardEditAdapter.EditorItem> items = new ArrayList<CardEditAdapter.EditorItem>();
         int selectedIndex = -1;
         for(int i = 0; i < keys.length; i ++) {
             CardEditAdapter.EditorItem item = new CardEditAdapter.EditorItem();
-            item.card = (String)keys[i];
-            if(item.card == thumbHolder.tab) {
-                item.color = Color.LTGRAY;
+            item.tab = (String)keys[i];
+            if(item.tab.equals(thumbHolder.tab)) {
+                item.color = ((MainActivity)mContext).getCardSelection();
             }
             else {
                 item.color = Color.TRANSPARENT;
@@ -56,10 +54,6 @@ public class EditCardDialog extends AlertDialog.Builder{
 
         this.setView(tableLayout);
         this.show();
-    }
-
-    List<EditText> getTextEdits() {
-        return list;
     }
 
     private TableRow initRow(TableLayout layout, String name, float weight, float height)   {
@@ -144,7 +138,8 @@ public class EditCardDialog extends AlertDialog.Builder{
                     ((CardEditAdapter.EditorItem)adapter.getItem(j)).color = Color.TRANSPARENT;
 
                 // change the background color of the selected element
-                ((CardEditAdapter.EditorItem)adapter.getItem(position)).color = Color.LTGRAY;
+                ((CardEditAdapter.EditorItem)adapter.getItem(position)).color =
+                        ((MainActivity)mContext).getCardSelection();
                 adapter.notifyDataSetChanged();
             }
         });
@@ -152,5 +147,18 @@ public class EditCardDialog extends AlertDialog.Builder{
         tableRow.addView(listView);
 
         return listView;
+    }
+
+    public String getTab() {
+        for(CardEditAdapter.EditorItem item : items) {
+            if(item.color == ((MainActivity)mContext).getCardSelection()) {
+                return item.tab;
+            }
+        }
+        return "";
+    }
+
+    public String getTitle() {
+        return list.get(0).getText().toString();
     }
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class CardEditAdapter extends BaseAdapter {
     static class EditorItem {
-        public String card;
+        public String tab;
         int color;
     }
     Context context;;
@@ -48,7 +48,7 @@ public class CardEditAdapter extends BaseAdapter {
         TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
         tv.setTextColor(Color.BLACK);
         tv.setBackgroundColor(arrayList.get(position).color);
-        tv.setText(arrayList.get(position).card);
+        tv.setText(arrayList.get(position).tab);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
         tv.setPadding(50, 0, 5, 2);
         tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);

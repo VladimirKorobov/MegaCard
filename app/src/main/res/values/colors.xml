@@ -5,4 +5,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorBackground">#FFFFFFFF</color>
     <color name="colorSelection">#FF0000F0</color>
+    <color name="colorSelectionCard">#FF808080</color>
 </resources>
