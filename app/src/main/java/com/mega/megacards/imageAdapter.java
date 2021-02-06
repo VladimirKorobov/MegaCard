@@ -38,10 +38,7 @@ public class imageAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.image_list, parent, false);
         }
         ImageView imageView;
-        imageView = (ImageView) convertView.findViewById(R.id.image);
-        //imageView.getLayoutParams().height = 600;
-        //imageView.setBackgroundColor(Color.WHITE);
-        //imageView.setImageResource(arrayList.get(position).getmThumbIds());
+        imageView = convertView.findViewById(R.id.image);
         imageView.setImageBitmap(arrayList.get(position).thumb);
         imageView.setBackgroundColor(arrayList.get(position).bkColor);
         return convertView;

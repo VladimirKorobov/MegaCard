@@ -102,14 +102,6 @@ public class PageFragment extends Fragment {
 
         if(position >= 0 && position <= list.size()) {
             list.get(position).bkColor = color;
-            /*
-            int firstVisible = gridView.getFirstVisiblePosition();
-            View view = gridView.getChildAt(position - firstVisible);
-            ImageView imageView;
-            imageView = (ImageView) view.findViewById(R.id.image);
-            imageView.setBackgroundColor(color);
-
-             */
         }
     }
 
@@ -117,14 +109,5 @@ public class PageFragment extends Fragment {
         Object[] keys = thumbMap.keySet().toArray();
         String key = (String)keys[mPage];
         gridView.setAdapter(new imageAdapter(mContext, thumbMap.get(key)));
-
-        /*
-        String[] processes = getActiveApps(mContext, mPage == 0);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,
-                android.R.layout.simple_list_item_1, processes);
-
-        listView.setAdapter(adapter);
-
-         */
     }
 }

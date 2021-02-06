@@ -14,43 +14,32 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -110,59 +99,11 @@ public class MainActivity extends AppCompatActivity {
         settingsHolder.readSettings(thumbMap);
         cleanup(thumbMap);
 
-        //gridView = (GridView) findViewById(R.id.gridview);
         viewPager = (ViewPager)findViewById(R.id.viewpager);
         viewPager.setAdapter(new TabPageAdapter(getSupportFragmentManager(), this, thumbMap));
 
-        //gridView.setAdapter(new imageAdapter(getApplicationContext(), thumbList));
-        //item click listner
-        /*
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView parent, View view, int position, long id) {
-                if(position == selectedPosition) {
-                    setItemColor(position, getBackground());
-                    selectedPosition = -1;
-                    ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
-                }
-                else {
-                    Intent intent = new Intent(MainActivity.this, ViewActivity.class);
-                    thumbHolder holder = (thumbHolder) gridView.getAdapter().getItem(position);
-
-                    intent.putExtra("fileName", holder.fileName);
-                    intent.putExtra("Title", holder.title);
-                    startActivity(intent);
-                }
-            }
-        });
-        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView parent, View view,
-                                           int position, long id) {
-                setItemColor(selectedPosition, getBackground());
-                setItemColor(position, getSelection());
-                selectedPosition = position;
-                ((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
-                return true;
-            }
-        });
-         */
     }
 
-    public void setItemColor(int position, int color) {
-        if(position >= 0 && position <= thumbList.size()) {
-            thumbList.get(position).bkColor = color;
-            /*
-            int firstVisible = gridView.getFirstVisiblePosition();
-            View view = gridView.getChildAt(position - firstVisible);
-            ImageView imageView;
-            imageView = (ImageView) view.findViewById(R.id.image);
-            imageView.setBackgroundColor(color);
-
-             */
-        }
-    }
     private Boolean hasPermission(String permission) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -426,7 +367,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DeleteScreenshots() {
-        //SparseBooleanArray checked = gridView.getCheckedItemPositions();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete all selected screenshots");
         builder.setMessage("Are you sure?");
@@ -460,8 +400,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     settingsHolder.writeSettings(thumbList);
                     notifyFragment();
-
-                    //((imageAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 }
             }
         });
@@ -622,7 +560,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeSettings1() {
-        //File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
         try {
             File settings = new File(mydir.getPath() + "/settings.txt");
@@ -669,6 +606,4 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
-
 }

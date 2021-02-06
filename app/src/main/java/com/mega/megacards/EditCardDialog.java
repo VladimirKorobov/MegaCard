@@ -95,7 +95,6 @@ public class EditCardDialog extends AlertDialog.Builder{
         EditText editText = new EditText(mContext);
         editText.setText(value);
         editText.setPadding(50, (int)(editText.getTextSize() / 2), 5, 2);
-        //editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, 30f);
         editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
         editText.setBackgroundColor(Color.WHITE);
         editText.setTextColor(Color.BLACK);
