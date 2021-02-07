@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         //settingsHolder.importSettings("/storage/emulated/0/Downloads/export/settingsDir");
         //settingsHolder.readSettings(thumbList);
         settingsHolder.readSettings(thumbMap);
-        cleanup(thumbMap);
+        //cleanup(thumbMap);
 
         viewPager = (ViewPager)findViewById(R.id.viewpager);
         viewPager.setAdapter(new TabPageAdapter(getSupportFragmentManager(), this, thumbMap));
@@ -330,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
                         bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
                         out.close();
                         holder.thumb = bitmap;
-                        settingsHolder.writeSettings(thumbList);
                         notifyFragment();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -347,6 +346,9 @@ public class MainActivity extends AppCompatActivity {
                     newHolders.add(holder);
                     //viewPager.setAdapter(new TabPageAdapter(getSupportFragmentManager(), This, thumbMap));
                     viewPager.getAdapter().notifyDataSetChanged();
+                }
+                if(titleChanged || tabChanged) {
+                    settingsHolder.writeSettings(thumbMap);
                 }
                 dialog.dismiss();
             }
@@ -398,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
                         s = "";
 
                     }
-                    settingsHolder.writeSettings(thumbList);
+                    settingsHolder.writeSettings(thumbMap);
                     notifyFragment();
                 }
             }
@@ -557,53 +559,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    private void writeSettings1() {
-        File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
-        try {
-            File settings = new File(mydir.getPath() + "/settings.txt");
-            if(settings.exists()) {
-                settings.delete();
-            }
-
-            FileOutputStream fw = new FileOutputStream(settings, true);
-            for(thumbHolder holder: thumbList) {
-                fw.write((holder.fileName + "\n").getBytes());
-                fw.write((holder.iconName + "\n").getBytes());
-                fw.write((holder.title + "\n").getBytes());
-            }
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // ...
-    }
-    private void readSettings1() {
-        File mydir = this.getDir("settingsDir", this.MODE_PRIVATE); //Creating an internal dir;
-        File settings = new File(mydir.getPath() + "/settings.txt");
-        if(settings.exists()) {
-            try {
-                BufferedReader fr = new BufferedReader(new FileReader(settings));
-                String fileName;
-                while((fileName = fr.readLine()) != null) {
-                    thumbHolder holder = new thumbHolder(this);
-                    holder.fileName = fileName;
-                    holder.iconName = fr.readLine();
-                    holder.title = fr.readLine();
-                    holder.thumb =  BitmapFactory.decodeFile(holder.iconName);
-                    thumbList.add(holder);
-                }
-                fileName = "";
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception ex) {
-                String m = ex.getMessage();
-                ex.printStackTrace();
-            }
-
-        }
     }
 }

@@ -38,6 +38,14 @@ public class EditCardDialog extends AlertDialog.Builder{
         list.add(addtext(tableLayout, "Title", thumbHolder.title, weights[0], textTypes[0]));
         Object[] keys = map.keySet().toArray();
         int selectedIndex = -1;
+        /*
+        CardEditAdapter.EditorItem item = new CardEditAdapter.EditorItem();
+        item.tab = "New...";
+        item.color = Color.TRANSPARENT;
+        items.add(item);
+        
+         */
+
         for(int i = 0; i < keys.length; i ++) {
             CardEditAdapter.EditorItem item = new CardEditAdapter.EditorItem();
             item.tab = (String)keys[i];

@@ -128,7 +128,16 @@ public class SettingsHolder {
             int item = 0;
             for ( String key : thumbMap.keySet() ) {
                 ArrayList<MainActivity.thumbHolder> list = thumbMap.get(key);
-                for (MainActivity.thumbHolder holder : list) {
+                if(list.size() == 0) {
+                    // Empty list - add dummy holder
+                    fw.write(("Item:" + Integer.toString(item) + "\n").getBytes());
+                    fw.write(("Tab:" + key + "\n").getBytes());
+                    fw.write(("Image:" + "" + "\n").getBytes());
+                    fw.write(("Thumb:" + "" + "\n").getBytes());
+                    fw.write(("Title:" + ""  + "\n").getBytes());
+                    fw.write(("Stop:" + "\n").getBytes());
+                }
+                else for (MainActivity.thumbHolder holder : list) {
                     fw.write(("Item:" + Integer.toString(item) + "\n").getBytes());
                     fw.write(("Tab:" + holder.tab + "\n").getBytes());
                     fw.write(("Image:" + holder.fileName + "\n").getBytes());
@@ -215,14 +224,17 @@ public class SettingsHolder {
                             holder.tab = value;
                             break;
                         case "Stop":
-                            holder.thumb =  BitmapFactory.decodeFile(holder.iconName);
-                            ArrayList<MainActivity.thumbHolder> list =thumbMap.get(holder.tab);
-                            if(list == null) {
-                                list = new ArrayList<MainActivity.thumbHolder>();
-                                thumbMap.put(holder.tab, list);
-                            }
+                            if(!holder.iconName.equals("") && !holder.fileName.equals("")) {
+                                holder.thumb = BitmapFactory.decodeFile(holder.iconName);
+                                ArrayList<MainActivity.thumbHolder> list = thumbMap.get(holder.tab);
+                                if (list == null) {
+                                    list = new ArrayList<MainActivity.thumbHolder>();
+                                    thumbMap.put(holder.tab, list);
+                                }
 
-                            list.add(holder);
+                                list.add(holder);
+                            }
+                            // else - dummy. Dom't add it
                             break;
                     }
                 }
