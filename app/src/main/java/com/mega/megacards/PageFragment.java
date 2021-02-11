@@ -20,7 +20,8 @@ public class PageFragment extends Fragment {
     private int mPage;
     private Context mContext;
     GridView gridView;
-    ThumbMap thumbMap;
+    //ThumbMap thumbMap;
+    ThumbTable thumbTable;
     private int selectedPosition = -1;
     @Override
     public void onCreate(Bundle savedInstanceSrate) {
@@ -30,11 +31,11 @@ public class PageFragment extends Fragment {
         }
     }
 
-    public static PageFragment newInstance(Context context, int page, ThumbMap thumbMap) {
+    public static PageFragment newInstance(Context context, int page, ThumbTable thumbTable) {
         Bundle args = new Bundle();
         args.putInt(ARG_PAGE, page);
         PageFragment fragment = new PageFragment();
-        fragment.thumbMap = thumbMap;
+        fragment.thumbTable = thumbTable;
         fragment.mContext = context;
         fragment.setArguments(args);
         return fragment;
@@ -46,9 +47,8 @@ public class PageFragment extends Fragment {
 
     public MainActivity.thumbHolder getSelectedHolder() {
         if(selectedPosition >= 0) {
-            Object[] keys = thumbMap.keySet().toArray();
-            String key = (String)keys[mPage];
-            ArrayList<MainActivity.thumbHolder> list = thumbMap.get(key);
+            String key = thumbTable.tabs()[mPage];
+            ArrayList<MainActivity.thumbHolder> list = thumbTable.get(key);
             if(selectedPosition < list.size()) {
                 return list.get(selectedPosition);
             }
@@ -96,9 +96,8 @@ public class PageFragment extends Fragment {
     }
 
     public void setItemColor(int position, int color) {
-        Object[] keys = thumbMap.keySet().toArray();
-        String key = (String)keys[mPage];
-        ArrayList<MainActivity.thumbHolder> list = thumbMap.get(key);
+        String key = thumbTable.tabs()[mPage];
+        ArrayList<MainActivity.thumbHolder> list = thumbTable.get(key);
 
         if(position >= 0 && position <= list.size()) {
             list.get(position).bkColor = color;
@@ -106,8 +105,7 @@ public class PageFragment extends Fragment {
     }
 
     public void UpdateView() {
-        Object[] keys = thumbMap.keySet().toArray();
-        String key = (String)keys[mPage];
-        gridView.setAdapter(new imageAdapter(mContext, thumbMap.get(key)));
+        String key = thumbTable.tabs()[mPage];
+        gridView.setAdapter(new imageAdapter(mContext, thumbTable.get(key)));
     }
 }

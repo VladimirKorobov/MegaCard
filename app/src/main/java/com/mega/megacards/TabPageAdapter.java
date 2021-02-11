@@ -13,11 +13,11 @@ public class TabPageAdapter extends FragmentStatePagerAdapter {
     final int PAGE_COUNT = 2;
     List<Fragment> fragments = new ArrayList<>();
     private Context context;
-    ThumbMap thumbMap;
-    public TabPageAdapter(FragmentManager fm, Context context, ThumbMap thumbMap) {
+    ThumbTable thumbTable;
+    public TabPageAdapter(FragmentManager fm, Context context, ThumbTable thumbTable) {
         super(fm);
         this.context = context;
-        this.thumbMap = thumbMap;
+        this.thumbTable = thumbTable;
     }
 
     public void Update() {
@@ -30,7 +30,7 @@ public class TabPageAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         Fragment fragment;
         if(position >= fragments.size()) {
-            fragment = PageFragment.newInstance(context, position, this.thumbMap);
+            fragment = PageFragment.newInstance(context, position, this.thumbTable);
             fragments.add(fragment);
         }
 
@@ -39,14 +39,13 @@ public class TabPageAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return thumbMap.keySet().size();
+        return thumbTable.size();
     }
     @Override
     public CharSequence getPageTitle(int position) {
 
-        if(position >= 0 && position < thumbMap.keySet().size()) {
-            Object[] keys = thumbMap.keySet().toArray();
-            return (String)keys[position];
+        if(position >= 0 && position < thumbTable.size()) {
+            return thumbTable.tabs()[position];
         }
         return "";
     }
