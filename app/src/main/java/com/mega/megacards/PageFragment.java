@@ -44,6 +44,11 @@ public class PageFragment extends Fragment {
     public int getSelectedPosition() {
         return selectedPosition;
     }
+    public int getItemCount() {
+        String key = thumbTable.tabs()[mPage];
+        ArrayList<MainActivity.thumbHolder> list = thumbTable.get(key);
+        return list.size();
+    }
 
     public MainActivity.thumbHolder getSelectedHolder() {
         if(selectedPosition >= 0) {

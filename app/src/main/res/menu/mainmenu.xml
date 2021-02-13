@@ -15,7 +15,13 @@
         android:id="@+id/id_exportsettings"
         android:title="@string/export_settings" />
     <item
+        android:id="@+id/id_edittab"
+        android:title="@string/edit_tab" />
+    <item
+        android:id="@+id/id_deletetab"
+        android:title="@string/delete_tab" />
+    <item
         android:id="@+id/id_exit"
-        android:title="Exit" />
+        android:title="@string/exit" />
 
 </menu>

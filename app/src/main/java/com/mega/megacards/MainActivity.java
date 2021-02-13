@@ -66,6 +66,16 @@ public class MainActivity extends AppCompatActivity {
         int bkColor;
     }
 
+    int[] menuIds = new int[]{
+        R.id.id_addscreenshot,
+        R.id.id_deletescreenshot,
+        R.id.id_editscreenshot,
+        R.id.id_exportsettings,
+        R.id.id_edittab,
+        R.id.id_deletetab
+    };
+
+
     ThumbTable thumbTable = new ThumbTable();
     SettingsHolder settingsHolder;
     ViewPager viewPager;
@@ -264,6 +274,41 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.mainmenu, menu);
         return true;
     }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        PageFragment fragment = getCurPageFragment();
+        thumbHolder selectedHolde = fragment.getSelectedHolder();
+        MenuItem mi;
+
+        // Hide all menu items
+        for(int i = 0; i < menuIds.length; i ++) {
+            mi = menu.findItem(menuIds[i]);
+            mi.setVisible(false);
+        }
+        if(selectedHolde != null) {
+            mi = menu.findItem(R.id.id_deletescreenshot);
+            mi.setVisible(true);
+            mi = menu.findItem(R.id.id_editscreenshot);
+            mi.setVisible(true);
+        }
+        else {
+            // enable add screenshot
+            mi = menu.findItem(R.id.id_addscreenshot);
+            mi.setVisible(true);
+            // enable edit tab
+            mi = menu.findItem(R.id.id_edittab);
+            mi.setVisible(true);
+            if(fragment.getItemCount() == 0) {
+                // tab is emprty - show delete tab
+                mi = menu.findItem(R.id.id_deletetab);
+                mi.setVisible(true);
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

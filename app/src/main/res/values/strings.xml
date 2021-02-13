@@ -4,4 +4,7 @@
     <string name="delete_screenshot">Delete Screenshot</string>
     <string name="edit_screenshot">Edit Screenshot</string>
     <string name="export_settings">Export Settings</string>
+    <string name="edit_tab">Edit Tab</string>
+    <string name="delete_tab">Delete Tab</string>
+    <string name="exit">Exit</string>
 </resources>
