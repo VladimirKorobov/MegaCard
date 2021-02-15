@@ -89,7 +89,7 @@ public class ThumbTable {
         thumbItemList.add(new ThumbTableItem(tab));
     }
 
-    public void move(String tab, int newPos) {
+    public void moveTab(String tab, int newPos) {
         int curTabPos = 0;
         if(newPos < 0)
             newPos = 0;
@@ -105,6 +105,26 @@ public class ThumbTable {
                 thumbItemList.add(newPos, item);
             }
         }
+    }
+
+    public boolean renameTab(String oldTab, String newTab) {
+        for(ThumbTableItem item: thumbItemList) {
+            if(item.tab.equals(newTab)) {
+                // tab already exists
+                return false;
+            }
+        }
+        for(ThumbTableItem item: thumbItemList) {
+            if(item.tab.equals(oldTab)) {
+                for(MainActivity.thumbHolder holder : item.thumbHolderList) {
+                    holder.tab = newTab;
+                }
+                item.tab = newTab;
+                return true;
+            }
+        }
+        // tab not found
+        return false;
     }
 
     public String getTab(int index) {

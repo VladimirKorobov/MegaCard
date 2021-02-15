@@ -113,4 +113,8 @@ public class PageFragment extends Fragment {
         String key = thumbTable.tabs()[mPage];
         gridView.setAdapter(new imageAdapter(mContext, thumbTable.get(key)));
     }
+
+    public String getTitle() {
+        return thumbTable.tabs()[mPage];
+    }
 }

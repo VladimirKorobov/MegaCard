@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
         R.id.id_deletescreenshot,
         R.id.id_editscreenshot,
         R.id.id_exportsettings,
-        R.id.id_edittab,
+        R.id.id_renametab,
+        R.id.id_movetab,
         R.id.id_deletetab
     };
 
@@ -297,7 +298,9 @@ public class MainActivity extends AppCompatActivity {
             mi = menu.findItem(R.id.id_addscreenshot);
             mi.setVisible(true);
             // enable edit tab
-            mi = menu.findItem(R.id.id_edittab);
+            mi = menu.findItem(R.id.id_renametab);
+            mi.setVisible(true);
+            mi = menu.findItem(R.id.id_movetab);
             mi.setVisible(true);
             if(fragment.getItemCount() == 0) {
                 // tab is emprty - show delete tab
@@ -321,6 +324,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.id_editscreenshot:
                 EditScreenshot();
                 break;
+            case R.id.id_renametab:
+                RenameTab();
+                break;
             case R.id.id_exportsettings:
                 ExportSettings();
                 break;
@@ -340,6 +346,44 @@ public class MainActivity extends AppCompatActivity {
     private void ExportSettings() {
         String exportDir = "/storage/emulated/0/Downloads/export";
         settingsHolder.exportSettings(exportDir);
+    }
+
+    private void RenameTab() {
+        final MainActivity This = this;
+        final EditTabDialog dlg = new EditTabDialog(this, thumbTable);
+        PageFragment fragment = getCurPageFragment();
+        final String oldTab = fragment.getTitle();
+
+        dlg.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        dlg.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String newTab = dlg.getValue();
+                if(thumbTable.renameTab(oldTab, newTab)) {
+                    settingsHolder.writeSettings(thumbTable);
+                    viewPager.getAdapter().notifyDataSetChanged();
+                }
+                else {
+                    android.app.AlertDialog.Builder alert = new
+                            android.app.AlertDialog.Builder(This);
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    alert.setTitle("Tab is not renamed.");
+                    alert.show();
+                }
+            }
+        });
+        dlg.showRename(oldTab);
     }
     private void EditScreenshot() {
         // Get selection

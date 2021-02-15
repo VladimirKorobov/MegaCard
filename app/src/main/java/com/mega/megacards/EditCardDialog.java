@@ -20,7 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EditCardDialog extends AlertDialog.Builder{
+public class EditCardDialog extends EditDialog{
     Context mContext;
     List<EditText> list;
     //ThumbMap thumbMap;
@@ -74,62 +74,6 @@ public class EditCardDialog extends AlertDialog.Builder{
         this.show();
     }
 
-    private TableRow initRow(TableLayout layout, String name, float weight, float height)   {
-        TableRow tableRow = new TableRow(mContext);
-        tableRow.setBackgroundColor(Color.BLACK);
-
-        // Create row with black paddings
-        TableRow.LayoutParams params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
-                1f);
-        tableRow.setPadding(0, 0, 0, 2);
-        tableRow.setLayoutParams(params);
-
-        // Create text view for field name
-        TextView textView = new TextView(mContext);
-        textView.setText(name);
-        //textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, 30f);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
-        textView.setBackgroundColor(Color.WHITE);
-        textView.setTextColor(Color.GRAY);
-        textView.setPadding(5, 0, 5, 2);
-        textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-        params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
-                weight);
-        params.setMargins(0,0, 2, 0);
-        textView.setLayoutParams(params);
-        tableRow.addView(textView);
-        layout.addView(tableRow);
-        return tableRow;
-    }
-
-    private EditText addtext(TableLayout layout, String name, String value, float weight, int textType) {
-        float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
-        TableRow tableRow = initRow(layout, name, weight, height);
-        // Create text edit for field value
-        EditText editText = new EditText(mContext);
-        editText.setText(value);
-        editText.setPadding(50, (int)(editText.getTextSize() / 2), 5, 2);
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
-        editText.setBackgroundColor(Color.WHITE);
-        editText.setTextColor(Color.BLACK);
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, height / 30.0f);
-        editText.setImeOptions(EditorInfo.IME_ACTION_GO);
-        editText.setInputType(textType);
-
-        TableRow.LayoutParams params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT,
-                1.f - weight);
-
-        editText.setLayoutParams(params);
-
-        tableRow.addView(editText);
-        return editText;
-    }
     private ListView addListView(TableLayout layout, String name, ArrayList<CardEditAdapter.EditorItem> items, final int selectedItem, float weight) {
         final float height = ((Activity)mContext).getWindow().getDecorView().getHeight();
         TableRow tableRow = initRow(layout, name, weight, height);
@@ -153,11 +97,11 @@ public class EditCardDialog extends AlertDialog.Builder{
             {
                 if(position == 0) {
                     // New tab
-                    final EditCardDialog dlg = new EditCardDialog(mContext, thumbTable);
-                    dlg.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    final EditTabDialog dlg = new EditTabDialog(mContext, thumbTable);
+                    dlg.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            String newTab = tabText.getText().toString();
+                            String newTab = dlg.getValue();
                             if(thumbTable.hasTab(newTab)) {
                                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
                                 builder.setTitle("Tab " + tabText.getText() + " already exists");
@@ -183,13 +127,13 @@ public class EditCardDialog extends AlertDialog.Builder{
                         }
                     });
 
-                    dlg.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    dlg.setNegativeButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
                         }
                     });
-                    dlg.showTabEdit();
+                    dlg.showNew();
 
                 }
                 for (int j = 0; j < adapter.getCount(); j++)

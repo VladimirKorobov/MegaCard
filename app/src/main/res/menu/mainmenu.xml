@@ -15,8 +15,11 @@
         android:id="@+id/id_exportsettings"
         android:title="@string/export_settings" />
     <item
-        android:id="@+id/id_edittab"
-        android:title="@string/edit_tab" />
+        android:id="@+id/id_renametab"
+        android:title="@string/rename_tab" />
+    <item
+        android:id="@+id/id_movetab"
+        android:title="@string/move_tab" />
     <item
         android:id="@+id/id_deletetab"
         android:title="@string/delete_tab" />
